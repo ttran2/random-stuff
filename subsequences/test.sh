@@ -1,6 +1,10 @@
 #!/bin/bash
 
-TOOL=${1:-./subsequences.py}
+TOOL=${1:-subsequences.py}
+
+if ! [[ $TOOL =~ ^/ ]]; then
+	TOOL="./$TOOL"
+fi
 
 FAILED=0
 
@@ -14,6 +18,7 @@ for i in tests/*.dat; do
 		echo "`basename $i .dat` : FAIL"
 		echo -e "\\tCorrect output: `cat $GOLDEN`"
 		echo -e "\\tYour output:    $OUT"
+		(( FAILED += 1 ))
 	fi
 done
 
