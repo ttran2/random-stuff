@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-n
+
 v = sys.stdin.read().split()
 short, long = v[:2] #take only first two words, randomly assigned variable
 
