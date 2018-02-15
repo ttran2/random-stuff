@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import sys
-from miscellaneous import *
 
 def dPrint(s):
     if __debug__:
@@ -37,7 +36,7 @@ class Game:
             if len(row) != self.size:
                 return
 
-        boardList = board2list(self.board)
+        boardList = self.board2list()
 
         #check if all number are unique (not efficient but it is one-liner)
         if len(boardList) != len(set(boardList)):
@@ -76,7 +75,7 @@ class Game:
 
     def inversion(self):
         #behind X tile, count number smaller then X
-        boardList = board2list(self.board)
+        boardList = self.board2list()
         count = 0
         tileNumber = 0
         while tileNumber < len(boardList):
