@@ -99,7 +99,11 @@ class Game:
 
 if __name__ == "__main__":
     g = Game()
-    g.load()
+    try:
+        g.load()
+    except:
+        print "NO"
+        raise SystemExit
     if not g.verify():
         print "NO"
         raise SystemExit
