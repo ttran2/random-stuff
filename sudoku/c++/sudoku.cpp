@@ -49,7 +49,7 @@ bool Game::load_position(void)
 }
 
 
-bool Game::_verify_board(bool bypass_zeroes)
+bool Game::_verify_board(bool fail_on_zeroes)
 {
 	int map;
 	int i, j, ii, jj;
@@ -59,11 +59,14 @@ bool Game::_verify_board(bool bypass_zeroes)
 	{
 		map = 0;
 		for(j = 0; j < SIZE; j++)
-			if(this->board[i][j] || bypass_zeroes)
+			if(this->board[i][j])
 				if((map >> this->board[i][j]) & 1)
 					return false;
 				else
 					map |= 1 << this->board[i][j];
+			else
+				if(fail_on_zeroes)
+					return false;
 	}
 
 	// columns
@@ -71,11 +74,14 @@ bool Game::_verify_board(bool bypass_zeroes)
 	{
 		map = 0;
 		for(j = 0; j < SIZE; j++)
-			if(this->board[j][i] || bypass_zeroes)
+			if(this->board[j][i])
 				if((map >> this->board[j][i]) & 1)
 					return false;
 				else
 					map |= 1 << this->board[j][i];
+			else
+				if(fail_on_zeroes)
+					return false;
 	}
 
 	// squares
@@ -85,11 +91,14 @@ bool Game::_verify_board(bool bypass_zeroes)
 			map = 0;
 			for(i = ii * 3; i < ii * 3 + 3; i++)
 				for(j = jj * 3; j < jj * 3 + 3; j++)
-					if(this->board[i][j] || bypass_zeroes)
+					if(this->board[i][j])
 						if((map >> this->board[i][j]) & 1)
 							return false;
 						else
 							map |= 1 << this->board[i][j];
+					else
+						if(fail_on_zeroes)
+							return false;
 		}
 
 	return true;

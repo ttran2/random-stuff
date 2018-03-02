@@ -18,7 +18,7 @@ public:
 	bool is_solved(void);
 
 private:
-	bool _verify_board(bool bypass_zeroes);
+	bool _verify_board(bool fail_on_zeroes);
 	int board[SIZE][SIZE];
 	int possibles[SIZE][SIZE];
 	int variants[SIZE][SIZE];
