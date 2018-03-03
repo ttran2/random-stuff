@@ -8,6 +8,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 
 using namespace std;
 
@@ -25,6 +26,23 @@ public:
 	bool operator<(const Poss &a) const { return n < a.n; }
 };
 
+
+class GameState
+{
+public:
+	int board[SIZE][SIZE];
+	int x, y, move;
+	GameState& operator=(GameState &a)
+		{
+			memcpy(&board, &a.board, sizeof(int) * SIZE * SIZE);
+			x = a.x;
+			y = a.y;
+			move = a.move;
+			return *this;
+		}
+};
+
+
 class Game
 {
 public:
@@ -40,9 +58,10 @@ public:
 private:
 	bool _verify_board(bool fail_on_zeroes);
 	int _compute_possibilities(int x, int y);
-	int board[SIZE][SIZE];
+	GameState gs;
 	int variants[SIZE][SIZE];
 	vector<Poss> nposs;
+	vector<GameState> move_stack;
 };
 
 #endif
