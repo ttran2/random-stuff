@@ -9,7 +9,7 @@ SOLVING_OPTION=--solve
 
 FAILED=0
 
-for testcase in `ls solving_tests`; do
+for testcase in `ls solving_tests/*.dat`; do
 	RESULT=`$TOOL $SOLVING_OPTION < solving_tests/$testcase | tail -n 1`
 	if [ "$RESULT" = "solved" ]; then
 		echo "solving test :: `basename $testcase .dat` :: PASS"
