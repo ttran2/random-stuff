@@ -1,6 +1,59 @@
 #!/usr/bin/python
 
 import sys
+from optparse import OptionParser
+
+#---------- Arguments ----------
+
+parser=OptionParser()
+parser.add_option("-d","--detail",action="store_true",dest="detail",help="print out debug messages")
+parser.add_option("-c","--color",action="store_true",dest="color",help="print out messages and boards with colors")
+parser.add_option("-s","--solve",action="store_true",dest="solve",help="solve the sudoku puzzle")
+(opt,args)=parser.parse_args()
+
+
+#---------- CONSTANTS ----------
+
+#errors
+ERR_ROW_NUM = 101
+ERR_COL_NUM = 102
+ERR_NUM = 103
+
+#incorrect
+INCOR_ROW = 201
+INCOR_COL = 202
+INCOR_BOX = 203
+
+#other
+SOLVED = 1
+CORRECT = 0
+
+#-------------------------------
+
+MSG = {
+    ERR_ROW_NUM:"incorrect number of row",
+    ERR_COL_NUM:"incorrect number of column",
+    ERR_NUM:"an incorrect number detected",
+
+    INCOR_ROW:"repeated number in a row",
+    INCOR_COL:"repeated number in a column",
+    INCOR_BOX:"repeated number in a small box",
+
+    SOLVED:"the game is already solved",
+    CORRECT:"the board follows sudoku rules",
+}
+
+#-------------------------------
+
+def state(constant):
+    if constant >= 200:
+        return "incorrect"
+    elif constant >= 100:
+        return "error"
+    elif constant == 1:
+        return "solved"
+    else:
+        return "correct"
 
 """
 def dPrint(string,alternative=None):
@@ -12,30 +65,11 @@ def dPrint(string,alternative=None):
 """
 
 def dPrint(string,alternative=None):
-    try:
-        if sys.argv[1] in ["-d","--details","details"]:
-            print string
-            alternative = None
-    except IndexError:
-        pass
+    if opt.detail:
+        print string
+        alternative = None
     if alternative:
         print alternative
-
-"""
-def color():
-    try:
-        global cDefault, cColor
-        if sys.argv[1] in ["-c","--color","--colors","color","colors"]:
-            from colorama import init, Fore
-            init()
-            cDefault = Fore.WHITE
-            cColor = Fore.RED
-        else:
-            print "NO COLOR"
-            cDefault = cColor = ""
-    except IndexError:
-        pass
-"""
 
 class Game:
     def __init__(self):
@@ -50,33 +84,33 @@ class Game:
     def verify(self):
         #check number of row
         if len(self.board) != 9:
-            return "error","incorrect number of row"
+            return ERR_ROW_NUM #return "error","incorrect number of row"
 
         #check number of column
         for row in self.board:
             if len(row) != 9:
-                return "error","incorrect number of column"
+                return ERR_COL_NUM #return "error","incorrect number of column"
 
         #check if number are from 0 - 9
         for row in self.board:
             for number in row:
                 if number not in range(10): #number < 0 or number > 9:
-                    return "error","an incorrect number detected"
+                    return ERR_NUM #return "error","an incorrect number detected"
 
         #check unique number
         if self.checkUnique(self.board): #check in row
-            return "incorrect","repeated number in a row"
+            return INCOR_ROW #return "incorrect","repeated number in a row"
 
         if self.checkUnique(self.getColumns()): #check in column
-            return "incorrect","repeated number in a column"
+            return INCOR_COL #return "incorrect","repeated number in a column"
 
         if self.checkUnique(self.getBox()): #check in box
-            return "incorrect","repeated number in a small box"
+            return INCOR_BOX #return "incorrect","repeated number in a small box"
 
         if self.checkSolved():
-            return "solved","the game is already solved"
+            return SOLVED #return "solved","the game is already solved"
         else:
-            return "correct",""
+            return CORRECT #return "correct",""
 
     def checkSolved(self):
         #check if any 'empty spots' (zeros)
@@ -116,7 +150,7 @@ class Game:
             removed.append(filter(lambda n: n != 0, part))
         return removed
 
-    def boxNumber(self,rowN,columnN): #UGLY SOLUTION! need to be rewrited!
+    def boxNumber(self,rowN,columnN):
         #data = [[0,0,0,1,1,1,2,2,2],[0,0,0,1,1,1,2,2,2],[0,0,0,1,1,1,2,2,2],[3,3,3,4,4,4,5,5,5],[3,3,3,4,4,4,5,5,5],[3,3,3,4,4,4,5,5,5],[6,6,6,7,7,7,8,8,8],[6,6,6,7,7,7,8,8,8],[6,6,6,7,7,7,8,8,8]]
         #boxN = data[rowN][columnN]
         #return boxN
@@ -202,7 +236,7 @@ if __name__ == "__main__":
     g = Game()
     try:
         g.load()
-        dPrint("BOARD DATA:\n" + str(g.board) + "\n" + "-"*30)
+        #dPrint("BOARD DATA:\n" + str(g.board) + "\n" + "-"*30)
     except ValueError:
         dPrint("[ ERROR ] Invalid character detected","error")
         raise SystemExit
@@ -210,14 +244,23 @@ if __name__ == "__main__":
         dPrint("[ ERROR ] Unknown error","error")
         raise SystemExit
 
+    g.boardPrint()
+    print "" #new line to seperate received board and message
+
     verifyResult = g.verify()
-    if verifyResult[0] != "correct":
-        dPrint("[ " + verifyResult[0].upper() + " ] " + verifyResult[1].capitalize(), verifyResult[0])
+    dPrint("[" + state(verifyResult).upper() + "] " + MSG[verifyResult].capitalize(), state(verifyResult))
+    #if verifyResult[0] != "correct":
+    if verifyResult:
+        #dPrint("[ " + verifyResult[0].upper() + " ] " + verifyResult[1].capitalize(), verifyResult[0])
         raise SystemExit
 
-    #start solving it...
-    dPrint("[SUCCESS] The board follows sudoku rules","correct")
-    if g.solvingLoop():
-        g.boardPrint()
-    else:
-        dPrint("\n" + "-"*30 + "BOARD DATA:\n" + str(g.board) + "\n" + "-"*30)
+    #dPrint("[SUCCESS] The board follows sudoku rules","correct")
+
+    if not opt.solve: #check for 'solve' argument
+        raise SystemExit
+
+    solve = g.solvingLoop()
+    print "" #new line to seperate message and solved board
+    g.boardPrint()
+    if solve:
+        print "solved" #for the test suite
