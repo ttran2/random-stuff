@@ -74,6 +74,7 @@ def dPrint(string,alternative=None):
 class Game:
     def __init__(self):
         self.board = []
+        self.backup = []
 
     def load(self):
         for line in sys.stdin:
@@ -165,6 +166,8 @@ class Game:
             for tile in row:
                 if tile == 0:
                     possibleNum = self.calculatePossible(rowN,columnN)
+                    if possibleNum == []: #if the tile does not have solution
+                        return False #ERROR! sudoku is not consistent, need to restore backup
                 else:
                     possibleNum = []
                 newRow.append(possibleNum)
@@ -172,6 +175,7 @@ class Game:
             list.append(newRow)
             rowN = rowN + 1
         self.possibilities = list
+        return True
 
     def calculatePossible(self,rowN,columnN):
         possibleNum = [1,2,3,4,5,6,7,8,9]
@@ -187,21 +191,24 @@ class Game:
 
     def solvingLoop(self):
         while True:
-            self.genPossibilities()
+            state = self.genPossibilities()
+            if not state: #there is an ERROR, tile does not have any possible number
+                self.restoreBackup()
+                continue
             tilesFilled = self.onePossible() #number of tiles that had one possible number
             if tilesFilled == 0:
                 if not self.checkSolved():
-                    dPrint("Sorry, this puzzle is out of my ability :-(")
-                    return False
+                    #dPrint("Sorry, this puzzle is out of my ability :-(")
+                    #return False
+                    self.morePossible() #stack of backups, list contain tuple that contain board, cord, possible num
                 else:
                     dPrint("Mission accomplished! :-D")
                     return True
 
     def onePossible(self):
-        possBoard = self.possibilities
         successNumber = 0
         rowN = 0
-        for row in possBoard:
+        for row in self.possibilities:
             columnN = 0
             for tile in row:
                 if len(tile) == 1:
@@ -211,6 +218,44 @@ class Game:
             rowN = rowN + 1
         dPrint("I found " + str(successNumber) + " tile(s) that have one possible number.")
         return successNumber
+
+    def morePossible(self):
+        tileData = self.smallestPossibleNum() #(rowN, columnN, possibleNum)
+        self.saveBackup(tileData)
+        dPrint("Saved a backup! Targeted tile: (" + str(tileData[0]) + "," + str(tileData[1]) + ");  (n. of backups: " + str(len(self.backup)) + ")")
+
+    def saveBackup(self, tileData): #backup the board and insert a possible number
+        rowN, columnN, possibleNum = tileData
+        if possibleNum == []:
+            return False
+        tileNumber = possibleNum.pop() #take biggest possible number of that specific tile
+        self.backup.append((self.board, rowN, columnN, possibleNum)) #possibleNum is a list
+        self.insert(tileNumber, rowN, columnN)
+        return True
+
+    def restoreBackup(self):
+        lastBackup = self.backup.pop() #(board, rowN, columnN, [possibleNum])
+        self.board = lastBackup[0] #overwrite current board with backuped board
+        tileData = lastBackup[1:]
+        while not self.saveBackup(tileData): #(rowN, columnN, [possibleNum])
+            pass
+        dPrint("Restored last backup! Targeted tile: (" + str(tileData[0]) + "," + str(tileData[1]) + ");  (n. of backups: " + str(len(self.backup)) + ")")
+
+    def smallestPossibleNum(self): #find empty tile with lowest numbers of possible number
+        lowestNumber = 10
+        rowN = 0
+        for row in self.possibilities:
+            columnN = 0
+            for tile in row:
+                numOfPossNum = len(tile)
+                if numOfPossNum < lowestNumber and tile != []: #tile has lower number of possible number then the lowest till now
+                    lowest_rowN = rowN
+                    lowest_columnN = columnN
+                    lowest_possibleNum = tile
+                    lowestNumber = numOfPossNum
+                columnN = columnN + 1
+            rowN = rowN + 1
+        return (lowest_rowN, lowest_columnN, lowest_possibleNum)
 
     def insert(self,value,rowN,columnN):
         self.board[rowN][columnN] = value
