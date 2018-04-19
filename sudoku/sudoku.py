@@ -2,6 +2,7 @@
 
 import sys
 from optparse import OptionParser
+from copy import deepcopy
 
 #---------- Arguments ----------
 
@@ -167,6 +168,7 @@ class Game:
                 if tile == 0:
                     possibleNum = self.calculatePossible(rowN,columnN)
                     if possibleNum == []: #if the tile does not have solution
+                        dPrint("[ERROR] Tile (" + str(rowN) + "," + str(columnN) + ") has no possible number!")
                         return False #ERROR! sudoku is not consistent, need to restore backup
                 else:
                     possibleNum = []
@@ -216,30 +218,32 @@ class Game:
                     successNumber = successNumber + 1
                 columnN = columnN + 1
             rowN = rowN + 1
-        dPrint("I found " + str(successNumber) + " tile(s) that have one possible number.")
+        dPrint("I found " + str(successNumber) + " tile(s) that have one possible number.\n")
         return successNumber
 
     def morePossible(self):
         tileData = self.smallestPossibleNum() #(rowN, columnN, possibleNum)
         self.saveBackup(tileData)
-        dPrint("Saved a backup! Targeted tile: (" + str(tileData[0]) + "," + str(tileData[1]) + ");  (n. of backups: " + str(len(self.backup)) + ")")
+        dPrint("Saved a backup! Targeted tile: (" + str(tileData[0]) + "," + str(tileData[1]) + "); Possible numbers: " + str(tileData[2]) + "; (n. of backups: " + str(len(self.backup)) + ")")
 
     def saveBackup(self, tileData): #backup the board and insert a possible number
         rowN, columnN, possibleNum = tileData
-        if possibleNum == []:
-            return False
         tileNumber = possibleNum.pop() #take biggest possible number of that specific tile
-        self.backup.append((self.board, rowN, columnN, possibleNum)) #possibleNum is a list
+        if possibleNum != []: #if there are no more possible number, the whole branch is wrong therefore not saving anything
+            boardBackup = deepcopy(self.board) #to not make it a reference
+            self.backup.append((boardBackup, rowN, columnN, possibleNum)) #possibleNum is a list
         self.insert(tileNumber, rowN, columnN)
-        return True
 
     def restoreBackup(self):
+        if self.backup == []:
+            dPrint("[ERROR] Impossible error","impossible error")
+            self.boardPrint()
+            raise SystemExit
         lastBackup = self.backup.pop() #(board, rowN, columnN, [possibleNum])
         self.board = lastBackup[0] #overwrite current board with backuped board
         tileData = lastBackup[1:]
-        while not self.saveBackup(tileData): #(rowN, columnN, [possibleNum])
-            pass
-        dPrint("Restored last backup! Targeted tile: (" + str(tileData[0]) + "," + str(tileData[1]) + ");  (n. of backups: " + str(len(self.backup)) + ")")
+        self.saveBackup(tileData) #(rowN, columnN, [possibleNum])
+        dPrint("Restored last backup! Targeted tile: (" + str(tileData[0]) + "," + str(tileData[1]) + "); Possible numbers: " + str(tileData[2]) + "; (n. of backups: " + str(len(self.backup)) + ")")
 
     def smallestPossibleNum(self): #find empty tile with lowest numbers of possible number
         lowestNumber = 10
@@ -259,6 +263,7 @@ class Game:
 
     def insert(self,value,rowN,columnN):
         self.board[rowN][columnN] = value
+        dPrint("\tFilled (" + str(rowN) + "," + str(columnN) + ") with " + str(value))
 
     def boardPrint(self):
         rowN = 0
