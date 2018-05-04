@@ -1,9 +1,20 @@
 #!/usr/bin/python
 
 #from difflib import *
-from math import sqrt
+from sys import stdin
+#from math import sqrt
 
-def gap(dataList):
+def input():
+    list = []
+    #list = stdin.read().split()
+    for item in stdin:
+        if item == "\n":
+            continue
+        list.append(float(item))
+    number = list.pop(0)
+    return number, list
+
+def gapInList(dataList):
     x = []
     """
     # gaps between items that are next to each other
@@ -14,6 +25,12 @@ def gap(dataList):
     for item_1 in dataList:
         for item_2 in dataList:
             x.append(abs(item_2 - item_1))
+    return sum(x)/len(x)
+
+def gapTargetNumber(targetNumber, dataList):
+    x = []
+    for item_1 in dataList:
+        x.append(abs(targetNumber - item_1))
     return sum(x)/len(x)
 
 def compare(targetNumber, dataList):
@@ -29,27 +46,34 @@ def compare(targetNumber, dataList):
     #-----
     """
 
-    print "-"*20
+    #print "-"*20
     return sum(x)/len(x)
 
 def howSimilar(value_1, value_2):
     # https://stackoverflow.com/questions/26109959/get-the-similarity-of-two-numbers-with-python
+
     if value_1 > value_2:
         value_1, value_2 = value_2, value_1
 
+    """
     a = value_1 * value_1
     b = value_2 * value_2
 
     x = a / sqrt(a * b)
-    print x
+    """
+
+    x = abs(float(value_1)/float(value_2))
+
+    #print x
     return x
 
-a = 12
-b = [12,5,12,3,12,3]
-c = [5,5,5,5,5,5,5,5,5,5,5,100000]
-d = [5,5,5,5,5,5,5]
-print "<<< TESTING >>>"
-print "a: %s" % a
-print "b: %s" % b
-print "c: %s" % c
-print "d: %s" % d
+if __name__ == "__main__":
+    number, list = input()
+    print "Targeted number: %s" % number
+    print "There is a similarity of: %s %%" % (compare(number,list)*100)
+    print "-"*30
+    x = gapTargetNumber(number,list)
+    print "Average gap between targeted number and list: %s" % x
+    y = gapInList(list)
+    print "Average gap between item in list: %s" % y
+    print "The gaps similarity is: %s %%" % (howSimilar(x,y)*100)
