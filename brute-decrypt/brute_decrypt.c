@@ -69,13 +69,7 @@ int main(void)
 	}
 
 	/* store STDIN into "encMsg" through a buffer */
-	while ( fgets(buf, MAX_SIZE, stdin) != NULL )
-	{
-		strcat(encrMsg, buf);
-
-	}
-
-	//printf("The string: %s\n", encrMsg); // for debug
+	fgets(encrMsg, MAX_SIZE, stdin)
 
 	// get size of the STDIN
 	size = strlen(encrMsg);
@@ -103,7 +97,6 @@ int main(void)
 			break;
 		}
 	}
-	//printf("DECRPTED MESSAGE (key: %d):\n\n%s\n", key, buf);
 
 	/* clean after myself */
 	free(buf);
