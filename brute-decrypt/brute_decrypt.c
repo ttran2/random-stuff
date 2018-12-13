@@ -1,31 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <ctype.h> // for tolower() and toupper()
 
 /* constants */
 #define MAX_SIZE 65536
 #define THRESHOLD 0.9
 
+#define DEBUG
 
 /* Analyze and determine how human-language the msg is */
 double readability(char *buf, int size)
 {
-	/* define confidence */
+	/* declare stuff */
 	double confidence;
+	int i, counter;
 
-	/* THIS IS FOR TESTING PURPOSES ONLY */
-	char* test = "cryptography";
-	if (strstr(buf, test) != NULL)
+	/* count integer */
+	counter = 0;
+	for (i = 0; i < size; i++)
 	{
-		//printf("This is it!\n");
-		confidence = 1;
+		if ( tolower(buf[i]) >= 'a' &&  tolower(buf[i]) <= 'z')
+		{
+			counter++;
+		}
+		if ( buf[i] == ' ')
+		{
+			counter++;
+		}
 	}
-	else
-	{
-		//printf("%c", buf[1]);
-		confidence = 0;
-	}
+
+	confidence = ((double) counter) / ((double) size);
+
+	#ifdef DEBUG
+	fprintf(stderr, "The counter: %i | The confidence: %f\n", counter, confidence);
+	#endif
 
 	return confidence;
 }
@@ -74,7 +83,9 @@ int main(void)
 	/*  BRUTE FORCE LOOP */
 	for (key = 1; key < 256; key++)
 	{
-		//printf("Checking key: %d\n", key); // for debug
+		#ifdef DEBUG
+		fprintf(stderr, "Checking key: %d | ", key);
+		#endif
 
 		/* loop through the characters in the encrypted msg */
 		for (i = 0; i < size; i++)
@@ -87,7 +98,8 @@ int main(void)
 
 		if (confidence > THRESHOLD)
 		{
-			printf("Found key: %d\n", key);
+			fprintf(stderr, "Found key: %d\n", key);
+			puts(buf); // print buf
 			break;
 		}
 	}
