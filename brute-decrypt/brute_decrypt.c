@@ -7,7 +7,6 @@
 #define MAX_SIZE 65536
 #define THRESHOLD 0.9
 
-#define DEBUG
 
 /* Analyze and determine how human-language the msg is */
 double readability(char *buf, int size)
@@ -69,7 +68,7 @@ int main(void)
 	}
 
 	/* store STDIN into "encMsg" through a buffer */
-	fgets(encrMsg, MAX_SIZE, stdin)
+	fgets(encrMsg, MAX_SIZE, stdin);
 
 	// get size of the STDIN
 	size = strlen(encrMsg);
