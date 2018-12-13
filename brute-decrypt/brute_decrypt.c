@@ -4,27 +4,26 @@
 
 
 /* constants */
-#define CLEAR(x) memset(x,'\0',1000)
 #define MAX_SIZE 65536
 #define THRESHOLD 0.9
 
 
 /* Analyze and determine how human-language the msg is */
-int readability(char *buf)
+double readability(char *buf, int size)
 {
 	/* define confidence */
-	int confidence;
+	double confidence;
 
 	/* THIS IS FOR TESTING PURPOSES ONLY */
 	char* test = "cryptography";
 	if (strstr(buf, test) != NULL)
 	{
-		printf("This is it!");
+		//printf("This is it!\n");
 		confidence = 1;
 	}
 	else
 	{
-		printf("%c", buf[1]);
+		//printf("%c", buf[1]);
 		confidence = 0;
 	}
 
@@ -35,19 +34,28 @@ int readability(char *buf)
 /* Main function */
 int main(void)
 {
-	/* define and declare stuff */
-	char *buf = malloc(MAX_SIZE * sizeof(char) + 1); // buffer
-	char *encrMsg = malloc(MAX_SIZE * sizeof(char) + 1); // encrypted msg
-	char *charBuf = malloc(sizeof(char) + 1); // buffer for single character
-	int i, key, confidence;
+	/* declare stuff */
+	int i, key, size;
+	double confidence;
 
-	/* charBuf will contain be like: [a character],[\0] */
-	charBuf[1] = '\0';
+	/* allocate memory for a buffer 'buf' */
+	char *buf = malloc((MAX_SIZE + 1) * sizeof(char)); // buffer
 
 	/* check if buffer was allocated successfully */
 	if (buf == NULL)
 	{
-		fprintf(stderr, "FATAL: Not enough memory.\n");
+		fprintf(stderr, "FATAL: Failed to allocate memory for 'encrMsg' :(\n");
+		return 1;
+	}
+
+	/* allocate memory for 'encrMsg' */
+	char *encrMsg = malloc((MAX_SIZE + 1) * sizeof(char));
+
+	/* check encrMsg allocation */
+	if (encrMsg == NULL)
+	{
+		fprintf(stderr, "FATAL: Failed to allocate memory for 'encrMsg' :(\n");
+		free(buf);
 		return 1;
 	}
 
@@ -58,11 +66,10 @@ int main(void)
 
 	}
 
-	/* clean after myself */
-	CLEAR(buf);
-	//free(buf);
-
 	//printf("The string: %s\n", encrMsg); // for debug
+
+	// get size of the STDIN
+	size = strlen(encrMsg);
 
 	/*  BRUTE FORCE LOOP */
 	for (key = 1; key < 256; key++)
@@ -70,15 +77,14 @@ int main(void)
 		//printf("Checking key: %d\n", key); // for debug
 
 		/* loop through the characters in the encrypted msg */
-		for (i = 0; i < strlen(encrMsg); i++)
+		for (i = 0; i < size; i++)
 		{
-			charBuf[0] = encrMsg[i]^key;
-			strcat(buf, charBuf);
+			buf[i] = encrMsg[i]^key;
 		}
 
 		/* Check whether the key is correct or not */
-		confidence = readability(buf);
-		
+		confidence = readability(buf, size);
+
 		if (confidence > THRESHOLD)
 		{
 			printf("Found key: %d\n", key);
@@ -88,7 +94,8 @@ int main(void)
 	//printf("DECRPTED MESSAGE (key: %d):\n\n%s\n", key, buf);
 
 	/* clean after myself */
-	//free(buf);
-	//free(encrMsg);
-	//free(charBuf);
+	free(buf);
+	free(encrMsg);
+
+	return 0;
 }
