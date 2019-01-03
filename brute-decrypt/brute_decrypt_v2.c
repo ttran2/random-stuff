@@ -68,7 +68,11 @@ int main(void)
 	}
 
 	/* store STDIN into "encMsg" through a buffer */
-	fgets(encrMsg, MAX_SIZE, stdin);
+	size = fread(encrMsg, 1, MAX_SIZE, stdin);
+	#ifdef DEBUG
+	fprintf(stderr, "Read: %i bytes\n", size);
+	#endif
+	//encrMsg[++size] = 0; // add 0 (aka '\0') at the end of the string
 
 	/* get size of the STDIN */
 	size = strlen(encrMsg);
