@@ -74,9 +74,6 @@ int main(void)
 	#endif
 	//encrMsg[++size] = 0; // add 0 (aka '\0') at the end of the string
 
-	/* get size of the STDIN */
-	size = strlen(encrMsg);
-
 	/* declare stuff for the brute force loop */
 	best_t best;
 	int numOfChar;
