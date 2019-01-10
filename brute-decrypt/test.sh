@@ -12,10 +12,8 @@ for txtFile in texts/plain/text_*.txt; do
 	echo $txtFile
 
 	for encrFile in texts/encrypted/$txtTitle.*.encr; do
-		#OUTPUT=$( cat $encrFile | $FILE 2> /dev/null)
-		OUTPUT=$( ./$FILE < $encrFile 2> /dev/null )
-
-		diff -q <(echo $OUTPUT) $txtFile &>/dev/null
+		#diff -q <( cat $encrFile | ./$FILE 2> /dev/null ) $txtFile &>/dev/null
+		diff -q <( ./$FILE < $encrFile 2> /dev/null ) $txtFile &>/dev/null
 
 		if [ $? -eq 0 ]; then
 			echo "$encrFile : PASS"
