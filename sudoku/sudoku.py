@@ -236,8 +236,8 @@ class Game:
 
     def restoreBackup(self):
         if self.backup == []:
-            dPrint("[ERROR] Impossible error","impossible error")
             self.boardPrint()
+            dPrint("[ERROR] This sudoku does not have any solution :(","unsolvable")
             raise SystemExit
         lastBackup = self.backup.pop() #(board, rowN, columnN, [possibleNum])
         self.board = lastBackup[0] #overwrite current board with backuped board
